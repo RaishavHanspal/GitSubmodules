@@ -1,0 +1,29 @@
+{
+    "name": "gitsubmodules",
+    "version": "1.0.0",
+    "description": "keep multiple repository references using git submodules",
+    "main": "index.js",
+    "scripts": {
+        "build": "npx webpack --config webpack.config.js --env developmemnt"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/RaishavHanspal/GitSubmodules.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/RaishavHanspal/GitSubmodules/issues"
+    },
+    "homepage": "https://github.com/RaishavHanspal/GitSubmodules#readme",
+    "dependencies": {
+        "babylonjs": "^6.11.1",
+        "typescript": "^5.1.6"
+    },
+    "devDependencies": {
+        "copy-webpack-plugin": "^11.0.0",
+        "ts-loader": "^9.4.4",
+        "webpack": "^5.88.1",
+        "webpack-cli": "^5.1.4"
+    }
+}

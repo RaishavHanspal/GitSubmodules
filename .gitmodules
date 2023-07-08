@@ -1,0 +1,3 @@
+[submodule "submoduleReference"]
+	path = submoduleReference
+	url = https://github.com/RaishavHanspal/submoduleReference.git
