@@ -1,5 +1,5 @@
 import HavokPhysics from "@babylonjs/havok";
-import { AbstractMesh, ArcRotateCamera, CSG, CreateGround, CreateSphere, Engine, FreeCamera, HavokPlugin, HemisphericLight, PhysicsAggregate, PhysicsShapeType, Scene, SceneLoader, Space, StandardMaterial, Vector3 } from "@babylonjs/core";
+import { AbstractMesh, ArcRotateCamera, Axis, CSG, CreateGround, CreateSphere, Engine, FreeCamera, HavokPlugin, HemisphericLight, HingeConstraint, Matrix, Mesh, PhysicsAggregate, PhysicsShapeType, Quaternion, Scene, SceneLoader, Space, StandardMaterial, Vector3 } from "@babylonjs/core";
 import "@babylonjs/loaders/OBJ"
 export class Game {
     scene: Scene;
@@ -15,8 +15,6 @@ export class Game {
     private init(): void {
         this.engine = new Engine(this.canvasElement);
         this.scene = new Scene(this.engine);
-        /** @todo - need to check for ArcRotationCamera too */
-        const cameraPosition: Vector3 = new Vector3(0, 5, -20);
         const lightPosition: Vector3 = new Vector3(0, 5, -10);
         this.camera = new ArcRotateCamera("camera", 1, 1, 20, new Vector3(0, 0, 0));
         this.camera.attachControl(this.canvasElement, false);
@@ -38,7 +36,15 @@ export class Game {
             mesh.material = glassMaterial;
             console.log(mesh)
             this.sphere = mesh;
-            new PhysicsAggregate(mesh, PhysicsShapeType.MESH, { mass: 0, restitution: 0.5, friction: 1, rotation: this.sphere.rotationQuaternion }, this.scene);
+            new PhysicsAggregate(mesh, PhysicsShapeType.MESH, { mass: 1, restitution: 0.5, friction: 1 }, this.scene);
+            /** constraint body */
+            const smallSphere = CreateSphere("ssphereConstraint", { diameter: 0.25 }, this.scene);
+            smallSphere.visibility = 0;
+            new PhysicsAggregate(smallSphere, PhysicsShapeType.SPHERE, { mass: 0, restitution: 0.5, friction: 1 }, this.scene);
+
+            /** constraint */
+            const constraint = new HingeConstraint(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 0, 0), this.scene)
+            this.sphere.physicsBody.addConstraint(smallSphere.physicsBody, constraint);
         })
     }
 
@@ -68,9 +74,8 @@ export class Game {
     }
 
     private update(): void {
-        if(this.sphere){
-            const rot = this.sphere.rotation.clone();
-            this.sphere.rotation = new Vector3(rot.x + 0.05, rot.y + 0.05, rot.z + 0.05)
+        if (this.sphere) {
+            this.sphere.physicsBody.setAngularVelocity(new Vector3(2, 0, 0))
         }
         this.scene.render();
     }
