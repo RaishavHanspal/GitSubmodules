@@ -33,7 +33,7 @@ export class GameAmmo {
         const coords = this.getCoords(5, 50);
         console.log(coords);
         coords.forEach(this.getSphere.bind(this));
-        SceneLoader.ImportMeshAsync("", "/assets/", "sphere.obj", this.scene).then((res) => {
+        SceneLoader.ImportMeshAsync("", "./assets/", "sphere.obj", this.scene).then((res) => {
             const mesh = res.meshes.find(a => (a.name.startsWith("sphere")));
             mesh.material = glassMaterial;
             console.log(mesh)
