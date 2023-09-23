@@ -19,6 +19,7 @@
     "homepage": "https://github.com/RaishavHanspal/GitSubmodules#readme",
     "dependencies": {
         "@babylonjs/havok": "^1.1.4",
+        "ammojs-typed": "^1.0.6",
         "babylonjs": "^6.11.1",
         "babylonjs-loaders": "^6.21.2",
         "cannon": "^0.6.2",

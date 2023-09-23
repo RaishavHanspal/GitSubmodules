@@ -21,10 +21,6 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
     },
     plugins: [
-        // new webpack.ProvidePlugin({
-        //     'oimo': 'oimo',
-        //     'cannon': 'cannon'
-        // }),
         new CopyPlugin({
             patterns: [
                 { from: "./assets", to: "assets" },
@@ -32,9 +28,6 @@ module.exports = {
             ],
         }),
     ],
-    // externals: {
-    //     cannon: "cannon"
-    // },
     mode: 'development',
     devtool: 'source-map'
 };
