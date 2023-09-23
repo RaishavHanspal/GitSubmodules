@@ -1,6 +1,8 @@
-import { Game } from "./game"
+import { GameCannon } from "./cannon";
+import { GameHavok } from "./havoc"
 
 document.addEventListener("DOMContentLoaded", (): void => {
     const canvasElement = document.getElementById("gameCanvas");
-    new Game(canvasElement);
+    new GameHavok(canvasElement);
+    // new GameCannon(canvasElement);
 })

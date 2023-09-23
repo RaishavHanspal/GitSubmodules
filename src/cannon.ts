@@ -1,7 +1,7 @@
-import HavokPhysics from "@babylonjs/havok";
-import { AbstractMesh, ArcRotateCamera, Axis, CSG, CreateGround, CreateSphere, Engine, FreeCamera, HavokPlugin, HemisphericLight, HingeConstraint, Matrix, Mesh, PhysicsAggregate, PhysicsShapeType, Quaternion, Scene, SceneLoader, Space, StandardMaterial, Vector3 } from "@babylonjs/core";
-import "@babylonjs/loaders/OBJ"
-export class Game {
+import { AbstractMesh, ArcRotateCamera, Axis, CSG, CannonJSPlugin, CreateGround, CreateSphere, Engine, FreeCamera, HavokPlugin, HemisphericLight, HingeConstraint, HingeJoint, LockConstraint, Matrix, Mesh, OimoJSPlugin, PhysicsAggregate, PhysicsImpostor, PhysicsJoint, PhysicsShapeType, Quaternion, Scene, SceneLoader, Space, StandardMaterial, Vector3, Vector4 } from "babylonjs";
+import * as CANNON from "cannon";
+import "babylonjs-loaders"
+export class GameCannon {
     scene: Scene;
     engine: Engine;
     camera: ArcRotateCamera;
@@ -10,6 +10,7 @@ export class Game {
         this.init();
         this.startPhysics();
         this.startRenderCycle();
+        (window as any).sceneObj = this;
     }
 
     private init(): void {
@@ -22,13 +23,13 @@ export class Game {
     }
 
     private async startPhysics() {
-        const havokInstance = await HavokPhysics();
-        const hk = new HavokPlugin(true, havokInstance);
+        (window as any).CANNON = CANNON;
+        const hk = new CannonJSPlugin()
         this.scene.enablePhysics(new Vector3(0, -9.8, 0), hk);
         const glassMaterial = new StandardMaterial("glass");
         glassMaterial.transparencyMode = 3;
         glassMaterial.alpha = 0.2;
-        const coords = this.getCoords(5);
+        const coords = this.getCoords(5, 50);
         console.log(coords);
         coords.forEach(this.getSphere.bind(this));
         SceneLoader.ImportMeshAsync("", "/assets/", "sphere.obj", this.scene).then((res) => {
@@ -36,15 +37,22 @@ export class Game {
             mesh.material = glassMaterial;
             console.log(mesh)
             this.sphere = mesh;
-            new PhysicsAggregate(mesh, PhysicsShapeType.MESH, { mass: 1, restitution: 0.5, friction: 1 }, this.scene);
+            mesh.checkCollisions = true;
+            this.scene.collisionsEnabled = true;
+            this.sphere.physicsImpostor = new PhysicsImpostor(mesh, PhysicsImpostor.MeshImpostor, { mass: 0, restitution: 0.5, friction: 1 }, this.scene);
             /** constraint body */
             const smallSphere = CreateSphere("ssphereConstraint", { diameter: 0.25 }, this.scene);
             smallSphere.visibility = 0;
-            new PhysicsAggregate(smallSphere, PhysicsShapeType.SPHERE, { mass: 0, restitution: 0.5, friction: 1 }, this.scene);
-
+            smallSphere.physicsImpostor = new PhysicsImpostor(smallSphere, PhysicsShapeType.SPHERE, { mass: 0, restitution: 0.5, friction: 1 }, this.scene);
             /** constraint */
-            const constraint = new HingeConstraint(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 0, 0), this.scene)
-            this.sphere.physicsBody.addConstraint(smallSphere.physicsBody, constraint);
+            const joint = new PhysicsJoint(PhysicsJoint.HingeJoint, {
+                mainPivot: new Vector3(0, 0, 0),
+                connectedPivot: new Vector3(-0.1, 0, 0),
+                mainAxis: new Vector3(1, 0, 0),
+                connectedAxis: new Vector3(1, 0, 0),
+            });
+            this.sphere.reIntegrateRotationIntoRotationQuaternion = true;
+            smallSphere.physicsImpostor.addJoint(this.sphere.physicsImpostor, joint);
         })
     }
 
@@ -52,7 +60,8 @@ export class Game {
         const [x, y, z]: number[] = coords;
         const smallSphere = CreateSphere("ssphere" + index, { diameter: 1 }, this.scene);
         smallSphere.position.set(x, y, z);
-        new PhysicsAggregate(smallSphere, PhysicsShapeType.SPHERE, { mass: 1, restitution: 1 }, this.scene);
+        smallSphere.checkCollisions = true;
+        new PhysicsImpostor(smallSphere, PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0 }, this.scene);
     }
 
     private getCoords(bounds: number, total: number = 5): number[][] {
@@ -75,7 +84,8 @@ export class Game {
 
     private update(): void {
         if (this.sphere) {
-            this.sphere.physicsBody.setAngularVelocity(new Vector3(2, 0, 0))
+            this.sphere.rotation.x += 0.05;
+            this.sphere.physicsImpostor.setAngularVelocity(new Vector3(2, 0, 0));
         }
         this.scene.render();
     }
