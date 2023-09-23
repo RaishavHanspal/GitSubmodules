@@ -77,6 +77,7 @@ export class GameHavok {
         if (this.sphere) {
             this.sphere.physicsBody.setAngularVelocity(new Vector3(2, 0, 0))
         }
+        document.getElementById("fps").innerHTML = this.engine.getFps().toFixed() + " fps";
         this.scene.render();
     }
 }

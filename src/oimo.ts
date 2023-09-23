@@ -1,7 +1,7 @@
-import { AbstractMesh, ArcRotateCamera, Axis, CSG, CannonJSPlugin, CreateGround, CreateSphere, Engine, FreeCamera, HavokPlugin, HemisphericLight, HingeConstraint, HingeJoint, LockConstraint, Matrix, Mesh, OimoJSPlugin, PhysicsAggregate, PhysicsImpostor, PhysicsJoint, PhysicsShapeType, Quaternion, Scene, SceneLoader, Space, StandardMaterial, Vector3, Vector4 } from "babylonjs";
-import * as CANNON from "cannon";
+import { AbstractMesh, ArcRotateCamera, Axis, CSG, CannonJSPlugin, CreateGround, CreateSphere, Engine, FreeCamera, GroundMesh, HavokPlugin, HemisphericLight, HingeConstraint, HingeJoint, LockConstraint, Matrix, Mesh, OimoJSPlugin, PhysicsAggregate, PhysicsImpostor, PhysicsJoint, PhysicsShapeType, Quaternion, Scene, SceneLoader, Space, StandardMaterial, Vector3, Vector4 } from "babylonjs";
+import * as OIMO from "oimo";
 import "babylonjs-loaders"
-export class GameCannon {
+export class GameOimo {
     scene: Scene;
     engine: Engine;
     camera: ArcRotateCamera;
@@ -23,8 +23,8 @@ export class GameCannon {
     }
 
     private async startPhysics() {
-        (window as any).CANNON = CANNON;
-        const hk = new CannonJSPlugin()
+        (window as any).OIMO = OIMO;
+        const hk = new OimoJSPlugin()
         this.scene.enablePhysics(new Vector3(0, -9.8, 0), hk);
         const glassMaterial = new StandardMaterial("glass");
         glassMaterial.transparencyMode = 3;
@@ -39,6 +39,9 @@ export class GameCannon {
             this.sphere = mesh;
             mesh.checkCollisions = true;
             this.scene.collisionsEnabled = true;
+            const ground = CreateGround("Ground", { width :10, height: 12}, this.scene);
+            ground.position.y = -10;
+            ground.physicsImpostor = new PhysicsImpostor(ground, PhysicsImpostor.PlaneImpostor, {mass: 0, restitution: 0.5, friction: 1,},  this.scene);
             this.sphere.physicsImpostor = new PhysicsImpostor(mesh, PhysicsImpostor.MeshImpostor, { mass: 1, restitution: 0.5, friction: 1 }, this.scene);
             /** constraint body */
             const smallSphere = CreateSphere("ssphereConstraint", { diameter: 0.25 }, this.scene);
